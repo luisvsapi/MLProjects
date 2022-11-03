@@ -62,11 +62,24 @@ x_test = x_test[..., tf.newaxis]
 train_ds = tf.data.Dataset.from_tensor_slices(
     (x_train, y_train)).shuffle(10000).batch(64)
 
+print(x_train.shape)
 test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(64)
 
 input = tf.keras.Input(shape=(3072,))
 dense = (tf.keras.layers.Dense(3072, activation='relu')(input))
+dense = (tf.keras.layers.Dropout(.2)(dense))
+dense = (tf.keras.layers.Dense(3072, activation='relu')(dense))
+dense = (tf.keras.layers.Dense(3072, activation='relu')(dense))
+dense = (tf.keras.layers.Dense(3072, activation='relu')(dense))
+dense = (tf.keras.layers.Dropout(.2)(dense))
+dense = (tf.keras.layers.Dense(3072, activation='relu')(dense))
+dense = (tf.keras.layers.Dense(3072, activation='relu')(dense))
+dense = (tf.keras.layers.Dense(3072, activation='relu')(dense))
+dense = (tf.keras.layers.Dense(3072, activation='relu')(dense))
+dense = (tf.keras.layers.Dense(3072, activation='relu')(dense))
 dense = (tf.keras.layers.Dense(1536, activation='relu')(dense))
+dense = (tf.keras.layers.Dense(1536, activation='relu')(dense))
+dense = (tf.keras.layers.Dropout(.2)(dense))
 dense = (tf.keras.layers.Dense(768, activation='relu')(dense))
 dense = (tf.keras.layers.Dense(255, activation='relu')(dense))
 outputs = tf.keras.layers.Dense(10, activation='softmax')(dense)
@@ -79,8 +92,8 @@ model.compile(loss='sparse_categorical_crossentropy',
               optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
 
 history = model.fit(x_train, y_train,
-                    batch_size=64,
-                    epochs=15,
+                    batch_size=512,
+                    epochs=30,
                     validation_split=0.2)
 test_scores = model.evaluate(x_test, y_test, verbose=2)
 print('Test loss:', test_scores[0])
