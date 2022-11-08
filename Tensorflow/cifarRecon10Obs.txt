@@ -1,0 +1,9 @@
+Al parecer cuando se tienen muchas capas de igual dimension al parecer no aprende nada, incluso sin el dropout.
+Sin regularizacion la precision de train es alta, pero la de test permanece intacta
+
+7 capas - 32 batch size - 25 epocas / 36% train, 32% test
+12 capas - 32 batch size - 25 epocas / 40% train, 34% test
+12 capas SGD - 32 batch size - 25 epocas / 100% train, 50% test
+12 capas SGD / 2 dropout - 32 batch size - 25 epocas / 95% train, 47% test
+12 capas SGD / 3 dropout - 32 batch size - 30 epocas / 95% train, 44% test
+12 capas SGD / inicializado - 32 batch size - 15 epocas / 100% train, 49% test
