@@ -1,1 +1,6 @@
 Tensorflow/*/venv
+Tensorflow/YOLO/__pycache__/*
+Tensorflow/YOLO/weights/*
+Tensorflow/YOLO/datasetLocal/*
+Tensorflow/PlayGround/images/*
+Tensorflow/PlayGround/__pycache__/
