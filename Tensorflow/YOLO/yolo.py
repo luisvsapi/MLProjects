@@ -47,6 +47,7 @@ def load_weights(variables, file_name):
         # Skip first 5 values containing irrelevant info
         np.fromfile(f, dtype=np.int32, count=5)
         weights = np.fromfile(f, dtype=np.float32)
+        print(variables)
 
         assign_ops = []
         ptr = 0
@@ -63,7 +64,7 @@ def load_weights(variables, file_name):
                 num_params = np.prod(shape)
                 var_weights = weights[ptr:ptr + num_params].reshape(shape)
                 ptr += num_params
-                assign_ops.append(tf.assign(var, var_weights))
+                assign_ops.append(tf.Variable(var, var_weights))
 
             shape = conv_var.shape.as_list()
             num_params = np.prod(shape)
@@ -71,7 +72,7 @@ def load_weights(variables, file_name):
                 (shape[3], shape[2], shape[0], shape[1]))
             var_weights = np.transpose(var_weights, (2, 3, 1, 0))
             ptr += num_params
-            assign_ops.append(tf.assign(conv_var, var_weights))
+            assign_ops.append(tf.Variable(conv_var, var_weights))
 
         # Loading weights for Yolo part.
         # 7th, 15th and 23rd convolution layer has biases and no batch norm.
@@ -89,7 +90,7 @@ def load_weights(variables, file_name):
                     num_params = np.prod(shape)
                     var_weights = weights[ptr:ptr + num_params].reshape(shape)
                     ptr += num_params
-                    assign_ops.append(tf.assign(var, var_weights))
+                    assign_ops.append(tf.Variable(var, var_weights))
 
                 shape = conv_var.shape.as_list()
                 num_params = np.prod(shape)
@@ -97,14 +98,14 @@ def load_weights(variables, file_name):
                     (shape[3], shape[2], shape[0], shape[1]))
                 var_weights = np.transpose(var_weights, (2, 3, 1, 0))
                 ptr += num_params
-                assign_ops.append(tf.assign(conv_var, var_weights))
+                assign_ops.append(tf.Variable(conv_var, var_weights))
 
             bias = variables[52 * 5 + unnormalized[j] * 5 + j * 2 + 1]
             shape = bias.shape.as_list()
             num_params = np.prod(shape)
             var_weights = weights[ptr:ptr + num_params].reshape(shape)
             ptr += num_params
-            assign_ops.append(tf.assign(bias, var_weights))
+            assign_ops.append(tf.Variable(bias, var_weights))
 
             conv_var = variables[52 * 5 + unnormalized[j] * 5 + j * 2]
             shape = conv_var.shape.as_list()
@@ -113,7 +114,7 @@ def load_weights(variables, file_name):
                 (shape[3], shape[2], shape[0], shape[1]))
             var_weights = np.transpose(var_weights, (2, 3, 1, 0))
             ptr += num_params
-            assign_ops.append(tf.assign(conv_var, var_weights))
+            assign_ops.append(tf.Variable(conv_var, var_weights))
 
     return assign_ops
 
@@ -136,10 +137,10 @@ model = Yolo_v3(n_classes = n_classes, model_size = _MODEL_INPUT_SIZE,
 inputs = tf.keras.Input(shape = (416, 416, 3), batch_size = batch_size, dtype = tf.float32)
 
 detections = model(inputs, training=False)
-"""
-model_vars = tf.global_variables(scope='yolo_v3_model')
-assign_ops = load_weights(model_vars, '../input/yolov3.weights')
 
+assign_ops = load_weights(list(detections[0].values()), './weights/yolov3.weights')
+
+"""
 with tf.Session() as sess:
     sess.run(assign_ops)
     detection_result = sess.run(detections, feed_dict={inputs: batch})

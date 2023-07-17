@@ -11,7 +11,7 @@ _ANCHORS = [(10, 13), (16, 30), (33, 23),
             (30, 61), (62, 45), (59, 119),
             (116, 90), (156, 198), (373, 326)]
 
-class Yolo_v3:
+class Yolo_v3(tf.Module):
 
     def __init__(self, n_classes, model_size, max_output_size, iou_threshold, confidence_threshold, data_format = None):
 
@@ -209,7 +209,7 @@ class Yolo_v3:
             new_height = out_shape[2]
             new_width = out_shape[1]
         
-        inputs = tf.compat.v1.image.resize_nearest_neighbor(inputs, (new_height, new_width))
+        inputs = tf.image.resize(inputs, (new_height, new_width), method = 'nearest')
 
         if data_format == 'channels_first':
             inputs = tf.transpose(inputs, [0, 3, 1, 2])
@@ -237,7 +237,7 @@ class Yolo_v3:
         for boxes in batch:
             boxes = tf.boolean_mask(boxes, boxes[:, 4] > confidence_treshold)
             classes = tf.argmax(boxes[: , 5:], axis = -1)
-            classes = tf.expand_dims(tf.to_float(classes), axis = -1)
+            classes = tf.expand_dims(tf.cast(classes, dtype = tf.float32), axis = -1)
             boxes = tf.concat([boxes[: , :5], classes], axis = -1)
 
             boxes_dict = dict()
@@ -340,7 +340,7 @@ class Yolo_v3:
 
             upsample_size = route1.get_shape().as_list()
             inputs = self.upsample(inputs, out_shape = upsample_size, data_format = self.data_format)
-            inputs = tf.concat([inputs, route], axis = axis)
+            inputs = tf.concat([inputs, route1], axis = axis)
 
             route, inputs = self.yolo_convolution_block(
                 inputs, filters = 128, training = training, data_format = self.data_format
